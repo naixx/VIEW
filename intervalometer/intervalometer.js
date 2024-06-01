@@ -339,7 +339,7 @@ var intervalometer = new EventEmitter();
 
 intervalometer.db = db;
 
-intervalometer.enableLogging = false;
+intervalometer.enableLogging = true;
 
 function log() {
     if(!intervalometer.enableLogging) return;
@@ -456,11 +456,13 @@ function motionSyncPulse(callback) {
 }
 
 function fileInit() {
-    fs.writeFileSync(intervalometer.status.timelapseFolder + "/details.csv", "frame, error, target, setting, rate, interval, timestamp, file, p, i, d\n");
+    fs.writeFileSync(intervalometer.status.timelapseFolder + "/details.csv", "frame, error, target, setting, rate, interval, timestamp, file, p, i, d, direction\n");
+    fs.appendFileSync(intervalometer.status.timelapseFolder + "/details.csv", "frame, evDiff, targetEv, rampEv, rate, intervalMs, lastPhotoTime, file, pComponent, iComponent, dComponent, direction\n");
+
 }
 
 function writeFile() {
-    fs.appendFileSync(intervalometer.status.timelapseFolder + "/details.csv", intervalometer.status.frames + ", " + intervalometer.status.evDiff + "," + exp.status.targetEv + "," + intervalometer.status.rampEv + "," + exp.status.rate + "," + (intervalometer.status.intervalMs / 1000) + "," + intervalometer.status.lastPhotoTime + "," + intervalometer.status.path + "," + exp.status.pComponent + "," + exp.status.iComponent + "," + exp.status.dComponent + "\n");
+    fs.appendFileSync(intervalometer.status.timelapseFolder + "/details.csv", intervalometer.status.frames + ", " + intervalometer.status.evDiff + "," + exp.status.targetEv + "," + intervalometer.status.rampEv + "," + exp.status.rate + "," + (intervalometer.status.intervalMs / 1000) + "," + intervalometer.status.lastPhotoTime + "," + intervalometer.status.path + "," + exp.status.pComponent + "," + exp.status.iComponent + "," + exp.status.dComponent + "," + exp.status.direction + "\n");
     //image.writeXMP(name, intervalometer.status.evDiff);
 }
 
@@ -2182,6 +2184,8 @@ function dynamicChangeUpdate() {
                     default:
                         intervalometer.currentProgram[param] = newVal;
                 }
+                logEvent("LIVE UPDATE:", "dynamicChangeUpdate", "param", param, "newVal", newVal,"item", item, intervalometer.status.exposure.status[param]);
+
                 item.lastVal = newVal;
                 if(item.endFrame < intervalometer.status.frames) {
                     delete intervalometer.status.dynamicChange[param];

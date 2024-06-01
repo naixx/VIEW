@@ -660,7 +660,7 @@ api.setEv = function(ev, options, callback) {
 
     for (var trys = 0; trys < 3; trys++) {
         while (ev < currentEv - 1 / 4) {
-            //console.log("ev < currentEv");
+            console.log("ev < currentEv");
             var s = decEv(shutterEv, shutterList);
             if (apertureEnabled) var a = decEv(apertureEv, apertureList);
             var i = decEv(isoEv, isoList);
@@ -680,11 +680,11 @@ api.setEv = function(ev, options, callback) {
                 break;
             }
             currentEv = api.getEv(shutterEv, apertureEv, isoEv);
-            //console.log(" update: ", currentEv);
+            console.log(" update: ", currentEv, " ",lastParam);
         }
 
         while (ev > currentEv + 1 / 4) {
-            //console.log("ev > currentEv");
+            console.log("ev > currentEv");
             var s = incEv(shutterEv, shutterList);
             if (apertureEnabled) var a = incEv(apertureEv, apertureList);
             var i = incEv(isoEv, isoList);
@@ -704,7 +704,7 @@ api.setEv = function(ev, options, callback) {
                 break;
             }
             currentEv = api.getEv(shutterEv, apertureEv, isoEv);
-            //console.log(" update: ", currentEv);
+            console.log(" update: ", currentEv, " ", lastParam);
         }
 
         if (Math.abs(ev - currentEv) <= 1 / 4) break;

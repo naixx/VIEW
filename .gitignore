@@ -6,3 +6,4 @@ frontend/DEV/*
 .DS_Store
 */.DS_Store
 segfault.log/*
+.idea
