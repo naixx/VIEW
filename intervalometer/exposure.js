@@ -33,11 +33,11 @@ exp.init = function(minEv, maxEv, nightLuminance, dayLuminance, highlightProtect
 
     exp.config = {
         sunrise: {
-            p: 0.9,
-            i: 0.4,
+            p: 0.97,
+            i: 0.5,
             d: 0.6,
-            targetTimeSeconds: 300,
-            evIntegrationSeconds: 300,
+            targetTimeSeconds: 360,
+            evIntegrationSeconds: 360,
             historyIntegrationSeconds: 480,
             highlightIntegrationFrames: 3,
         },
@@ -55,7 +55,7 @@ exp.init = function(minEv, maxEv, nightLuminance, dayLuminance, highlightProtect
         maxRate: 30,
         hysteresis: 0.4,
         nightCompensationDayEv: 10,
-        nightCompensationNightEv: -2,
+        nightCompensationNightEv: -1,
         nightCompensation: 'auto',
         nightLuminance: nightLuminance,
         dayLuminance: dayLuminance,
