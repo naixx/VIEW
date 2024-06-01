@@ -46,7 +46,7 @@ exports.linear = function(xyPoints, xVal) {
     if(res > limits.max) res = limits.max;
     if(res < limits.min) res = limits.min;
 
-    //console.log("Interpolated result:", res);
+    console.log("Interpolated result:", res);
 
     return res;
 }

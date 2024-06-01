@@ -180,6 +180,18 @@ exp.calculate_TLPAuto = function(currentEv, lastPhotoLum, lastPhotoHistogram, mi
         exp.status.highlights = tempArray.reduce(function(sum, val) { return sum + val}) / tempArray.length;
         if(local.targetHighlights === null) local.targetHighlights = Math.max(exp.status.highlights, 2);
 
+        console.log("HIGHLIGHTS: lastPhotoHistogram = ",  lastPhotoHistogram);
+      	console.log("HIGHLIGHTS: highlights = ", highlights);
+        console.log("HIGHLIGHTS: highlightArray = ",  local.highlightArray);
+        console.log("HIGHLIGHTS: tempArray = ",  tempArray);
+        console.log("HIGHLIGHTS: exp.status.highlights = ",  exp.status.highlights);
+        console.log("HIGHLIGHTS: local.targetHighlights = ",  local.targetHighlights);
+        console.log("HIGHLIGHTS: exp.status.highlights > local.targetHighlights * 2 && lastPhotoHistogram[255] > local.targetHighlights && exp.status.highlightProtection < exp.config.highlightProtectionLimit");
+        console.log("HIGHLIGHTS: ", exp.status.highlights , " " , local.targetHighlights * 2 , " " , lastPhotoHistogram[255] , " " , local.targetHighlights , " " , exp.status.highlightProtection , " " , exp.config.highlightProtectionLimit);
+        console.log("HIGHLIGHTS: exp.status.highlights < local.targetHighlights / 2 && exp.status.highlightProtection > 0.3");
+        console.log("HIGHLIGHTS: ", exp.status.highlights , " " ,  local.targetHighlights / 2 , " " ,  exp.status.highlightProtection , " " ,  0.3);
+
+
         if(exp.status.highlights > local.targetHighlights * 2 && lastPhotoHistogram[255] > local.targetHighlights && exp.status.highlightProtection < exp.config.highlightProtectionLimit) {
             exp.status.highlightProtection += 0.333;
             exp.status.manualOffsetEv -= 0.333;
@@ -275,6 +287,12 @@ function calculateDelta(currentEv, lastPhotoLum, config) {
         exp.status.fixedRefEv = lastPhotoLum;
         exp.status.manualOffsetEv = lastPhotoLum - getEvOffsetScale(currentEv, lastPhotoLum);
         console.log("EXPOSURE: lastPhotoLum =", lastPhotoLum);
+ console.log("EXPOSURE: currentEv =", currentEv);
+        console.log("EXPOSURE: exp.status.nightRefEv =", exp.status.nightRefEv);
+        console.log("EXPOSURE: exp.status.dayRefEv =", exp.status.dayRefEv);
+        console.log("EXPOSURE: exp.status.nightRatio =", exp.status.nightRatio);
+        console.log("EXPOSURE: exp.config.nightLuminance =", exp.config.nightLuminance);
+        console.log("EXPOSURE: exp.config.dayLuminance =", exp.config.dayLuminance);
         console.log("EXPOSURE: exp.status.manualOffsetEv =", exp.status.manualOffsetEv);
         console.log("EXPOSURE: getEvOffsetScale(currentEv, lastPhotoLum) =", getEvOffsetScale(currentEv, lastPhotoLum));
         //exp.status.offsetEv = getEvOffsetScale(currentEv, lastPhotoLum) + exp.status.manualOffsetEv;
