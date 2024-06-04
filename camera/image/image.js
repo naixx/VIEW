@@ -83,7 +83,7 @@ exports.writeXMP = function(fileName, exposureCompensation, description, name, l
   </rdf:Description>\n\
   </rdf:RDF>\n\
 </x:xmpmeta>';
-    
+
     var gpsData = "";
     if(lat != null && lat != null) {
         if(lat < 0) {
@@ -215,7 +215,7 @@ exports.downsizeJpeg = function(jpeg, size, crop, callback) {
 
 exports.downsizeJpegSharp = function(jpeg, size, crop, exposureCompensation, callback) {
     return exports.downsizeJpeg(jpeg, size, crop, callback);
-    
+
 
 
     console.log("IMAGE: (sharp) Resizing photo...");
@@ -329,7 +329,7 @@ exports.histogramArray = function(jpegBuffer, callback) {
     fs.writeFile(TMP_IMAGE_THUMB, new Buffer(jpegBuffer), function() {
         luminance.read(TMP_IMAGE_THUMB, function(err, res) {
             var histArray = null;
-            if(!err && res && res.histogram) histArray = res.histogram; 
+            if(!err && res && res.histogram) histArray = res.histogram;
             if (callback) callback(err, histArray);
         });
         /*pixelr.read(TMP_IMAGE_THUMB, "jpeg", function(err, data) {
@@ -358,10 +358,10 @@ exports.exposureValue = function(jpegBuffer, callback) {
             var lum = 0;
             if(!err && res && res.luminance) {
                 lum = res.luminance;
-                if(res.clipped && highlightProtection) {
+               /* if(res.clipped && highlightProtection) {
                     console.log("IMAGE: Compensating for clipped highlights: ", res.clipped * highlightProtection);
                     lum += res.clipped * highlightProtection;
-                }
+                }*/
             }
             if (callback) callback(err, lum, res.histogram);
         });
