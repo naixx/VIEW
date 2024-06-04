@@ -8,9 +8,9 @@ exp.config = {};
 
 
 //exp.init = function(minEv, maxEv, nightCompensation, highlightProtection) {
-exp.init = function(minEv, maxEv, nightLuminance, dayLuminance, highlightProtection) {
-    if(nightLuminance == null) nightLuminance = -1.5;
-    if(dayLuminance == null) dayLuminance = 0;
+exp.init = function (minEv, maxEv, nightLuminance, dayLuminance, highlightProtection) {
+    if (nightLuminance == null) nightLuminance = -1.5;
+    if (dayLuminance == null) dayLuminance = 0;
 
     local = {
         lumArray: [],
@@ -66,20 +66,21 @@ exp.init = function(minEv, maxEv, nightLuminance, dayLuminance, highlightProtect
     return exp.config;
 }
 
-exp.calculate = function(algorithm, direction, currentEv, lastPhotoLum, lastPhotoHistogram, minEv, maxEv) {
-    if(minEv != null) exp.config.minEv = minEv;
-    if(maxEv != null) exp.config.maxEv = maxEv;
-    lastPhotoHistogram = normalizeHistogram(lastPhotoHistogram);
+exp.calculate = function (algorithm, direction, currentEv, lastPhotoLum, lastPhotoHistogram, minEv, maxEv) {
+    if (minEv != null) exp.config.minEv = minEv;
+    if (maxEv != null) exp.config.maxEv = maxEv;
+   //// lastPhotoHistogram = normalizeHistogram(lastPhotoHistogram);
 
-    if(['auto', 'sunset', 'sunrise'].indexOf(direction) === -1) direction = 'auto';
+    if (['auto', 'sunset', 'sunrise'].indexOf(direction) === -1) direction = 'auto';
 
     //if(algorithm == "lrt") {
     //    return exp.calculate_LRTtimelapse(currentEv, direction, lastPhotoLum, lastPhotoHistogram, minEv, maxEv);
     //} else {
-        return exp.calculate_TLPAuto(currentEv, lastPhotoLum, lastPhotoHistogram, minEv, maxEv);
+    return exp.calculate_TLPAuto(currentEv, lastPhotoLum, lastPhotoHistogram, minEv, maxEv);
     //}
 }
 
+/*
 exp.calculate_LRTtimelapse = function(currentEv, direction, lastPhotoLum, lastPhotoHistogram, minEv, maxEv) {
     var lum = 0;
     for(var i = 0; i < 256; i++) {
@@ -96,7 +97,7 @@ exp.calculate_LRTtimelapse = function(currentEv, direction, lastPhotoLum, lastPh
         exp.status.rampEv = currentEv;
         local.lrtLumArray = [];
         local.targetLum = lum;
-    
+
         if(direction == 'sunrise') {
             local.direction = 1;
         } else if(direction == 'sunset') {
@@ -132,15 +133,33 @@ exp.calculate_LRTtimelapse = function(currentEv, direction, lastPhotoLum, lastPh
     console.log("LRT Lum:", lum, local.direction, local.targetLum, " currentEv:", currentEv, ", newEv:", exp.status.rampEv, ", Dir:", direction);
 
     return exp.status.rampEv;
+}*/
+
+function highlightsF(histogram, size) {
+    return histogram.slice(size * 0.75, size).reduce(function (acc, val) {
+        return acc + val;
+    }, 0);
 }
 
-exp.calculate_TLPAuto = function(currentEv, lastPhotoLum, lastPhotoHistogram, minEv, maxEv) {
+function underexposedF(histogram, size) {
+    return histogram.slice(0, size / 2).reduce(function (acc, val) {
+        return acc + val;
+    }, 0);
+}
+
+function overexposedF(histogram, size) {
+    return histogram.slice(size / 2, size).reduce(function (acc, val) {
+        return acc + val;
+    }, 0);
+}
+
+exp.calculate_TLPAuto = function (currentEv, lastPhotoLum, lastPhotoHistogram, minEv, maxEv) {
     // measure the interval
     exp.status.intervalSeconds = 0;
     var thisPhotoTime = new Date();
     if (local.lastPhotoTime) {
         var intervalSeconds = (thisPhotoTime - local.lastPhotoTime) / 1000;
-        if(intervalSeconds > 0) {
+        if (intervalSeconds > 0) {
             exp.status.intervalSeconds = intervalSeconds; // in case the time changes while running, make sure this is never negative
         }
     }
@@ -160,8 +179,8 @@ exp.calculate_TLPAuto = function(currentEv, lastPhotoLum, lastPhotoHistogram, mi
     if (Math.abs(exp.status.rate) < exp.config.hysteresis) exp.status.rate = 0;
 
     // limit to max rate
-    if(exp.status.rate > exp.config.maxRate) exp.status.rate = exp.config.maxRate;
-    if(exp.status.rate < -exp.config.maxRate) exp.status.rate = -exp.config.maxRate;
+    if (exp.status.rate > exp.config.maxRate) exp.status.rate = exp.config.maxRate;
+    if (exp.status.rate < -exp.config.maxRate) exp.status.rate = -exp.config.maxRate;
 
     // don't swing quickly past zero (stops oscillation)
     if (exp.status.rate > 3 && exp.status.direction < -0.5) exp.status.rate = 0;
@@ -170,36 +189,39 @@ exp.calculate_TLPAuto = function(currentEv, lastPhotoLum, lastPhotoHistogram, mi
     // adjust exposure according to rate in stops/hour
     exp.status.rampEv += (exp.status.rate / 3600) * exp.status.intervalSeconds;
 
-    if(exp.config.highlightProtection) {
-        var highlights = lastPhotoHistogram[255] + lastPhotoHistogram[254] / 2;
+    if (exp.config.highlightProtection) {
 
-        // highlight protection
-        local.highlightArray.unshift(highlights);
-        local.highlightArray = local.highlightArray.slice(0, config.highlightIntegrationFrames);
-        var tempArray = local.highlightArray.slice(0).sort(function (a, b) {  return a - b;  }).slice(local.highlightArray.length > 2 ? 1 : 0, local.highlightArray.length > 2 ? local.highlightArray.length - 1 : local.highlightArray.length);
-        exp.status.highlights = tempArray.reduce(function(sum, val) { return sum + val}) / tempArray.length;
-        if(local.targetHighlights === null) local.targetHighlights = Math.max(exp.status.highlights, 2);
-
-        console.log("HIGHLIGHTS: lastPhotoHistogram = ",  lastPhotoHistogram);
-      	console.log("HIGHLIGHTS: highlights = ", highlights);
-        console.log("HIGHLIGHTS: highlightArray = ",  local.highlightArray);
-        console.log("HIGHLIGHTS: tempArray = ",  tempArray);
-        console.log("HIGHLIGHTS: exp.status.highlights = ",  exp.status.highlights);
-        console.log("HIGHLIGHTS: local.targetHighlights = ",  local.targetHighlights);
-        console.log("HIGHLIGHTS: exp.status.highlights > local.targetHighlights * 2 && lastPhotoHistogram[255] > local.targetHighlights && exp.status.highlightProtection < exp.config.highlightProtectionLimit");
-        console.log("HIGHLIGHTS: ", exp.status.highlights , " " , local.targetHighlights * 2 , " " , lastPhotoHistogram[255] , " " , local.targetHighlights , " " , exp.status.highlightProtection , " " , exp.config.highlightProtectionLimit);
-        console.log("HIGHLIGHTS: exp.status.highlights < local.targetHighlights / 2 && exp.status.highlightProtection > 0.3");
-        console.log("HIGHLIGHTS: ", exp.status.highlights , " " ,  local.targetHighlights / 2 , " " ,  exp.status.highlightProtection , " " ,  0.3);
+        const maxHist = Math.max.apply(null, lastPhotoHistogram);
+        const u = underexposedF(lastPhotoHistogram, lastPhotoHistogram.length);
+        const o = overexposedF(lastPhotoHistogram, lastPhotoHistogram.length);
+        const h = highlightsF(lastPhotoHistogram, lastPhotoHistogram.length);
+        const overexposed = 100 * o / (u + o);
+        const underexposed = 100 * u / (u + o);
+        const highlights = 100 * h / (u + o);
 
 
-        if(exp.status.highlights > local.targetHighlights * 2 && lastPhotoHistogram[255] > local.targetHighlights && exp.status.highlightProtection < exp.config.highlightProtectionLimit) {
+        console.log("HIGHLIGHTS: lastPhotoHistogram = ", JSON.stringify(lastPhotoHistogram));
+        console.log("HIGHLIGHTS: maxHist = ", maxHist);
+        console.log("HIGHLIGHTS: u = ", u);
+        console.log("HIGHLIGHTS: o = ", o);
+        console.log("HIGHLIGHTS: h = ", h);
+        console.log("HIGHLIGHTS: over = ", overexposed);
+        console.log("HIGHLIGHTS: under = ", underexposed);
+        console.log("HIGHLIGHTS: hi = ", highlights);
+
+        const shouldProtect = (highlights > 30 && underexposed <= 51) // this check is for overexposed highlights. blacks and half midtones should be less 51%
+            || (lastPhotoHistogram[lastPhotoHistogram.size - 1] == maxHist && underexposed < 70); // when highlights are clipped but that is a hdr scene, don't clip. 70 backs and midtones enough for hdr
+
+        if (shouldProtect          /* exp.status.highlightProtection < exp.config.highlightProtectionLimit*/) {
             exp.status.highlightProtection += 0.333;
             exp.status.manualOffsetEv -= 0.333;
-            exp.status.rampEv += 0.333;
-        } else if(exp.status.highlights < local.targetHighlights / 2 && exp.status.highlightProtection > 0.3) {
+            exp.status.rampEv -= 0.333;
+            console.log("HIGHLIGHTS: protecting", exp.status.highlightProtection);
+        } else if (!shouldProtect && exp.status.highlightProtection > 0.3) {
             exp.status.highlightProtection -= 0.333;
             exp.status.manualOffsetEv += 0.333;
-            exp.status.rampEv -= 0.333;
+            exp.status.rampEv += 0.333;
+            console.log("HIGHLIGHTS: restoring", exp.status.highlightProtection);
         }
         exp.status.highlightProtection = Math.round(exp.status.highlightProtection * 1000) / 1000;
     }
@@ -209,7 +231,6 @@ exp.calculate_TLPAuto = function(currentEv, lastPhotoLum, lastPhotoHistogram, mi
 
     return exp.status.rampEv;
 }
-
 
 
 // ******* Private Functions ******* //
@@ -287,7 +308,7 @@ function calculateDelta(currentEv, lastPhotoLum, config) {
         exp.status.fixedRefEv = lastPhotoLum;
         exp.status.manualOffsetEv = lastPhotoLum - getEvOffsetScale(currentEv, lastPhotoLum);
         console.log("EXPOSURE: lastPhotoLum =", lastPhotoLum);
- console.log("EXPOSURE: currentEv =", currentEv);
+        console.log("EXPOSURE: currentEv =", currentEv);
         console.log("EXPOSURE: exp.status.nightRefEv =", exp.status.nightRefEv);
         console.log("EXPOSURE: exp.status.dayRefEv =", exp.status.dayRefEv);
         console.log("EXPOSURE: exp.status.nightRatio =", exp.status.nightRatio);
@@ -317,8 +338,8 @@ function calculateDelta(currentEv, lastPhotoLum, config) {
 
 function getEvOffsetScale(ev, lastPhotoLum, noAuto) {
     var evScale
-    if(exp.config.nightCompensation == 'auto') {
-        if(noAuto) { // for LRT algorithm
+    if (exp.config.nightCompensation == 'auto') {
+        if (noAuto) { // for LRT algorithm
             evScale = [{
                 ev: exp.config.nightCompensationNightEv,
                 offset: -1.333333
@@ -345,7 +366,7 @@ function getEvOffsetScale(ev, lastPhotoLum, noAuto) {
         }]
     }
 
-    var values = evScale.map(function(item) {
+    var values = evScale.map(function (item) {
         return {
             x: item.ev,
             y: item.offset
@@ -356,14 +377,16 @@ function getEvOffsetScale(ev, lastPhotoLum, noAuto) {
 
 function normalizeHistogram(histogramArray) {
     var lum = 0, sum = 0;
-    for(var i = 0; i < 256; i++) {
+    for (var i = 0; i < 256; i++) {
         sum += histogramArray[i];
     }
     sum /= 256;
-    for(var i = 0; i < 256; i++) {
+    for (var i = 0; i < 256; i++) {
         histogramArray[i] = histogramArray[i] / sum;
     }
     return histogramArray;
 }
+
+exp.normalizeHistogram = normalizeHistogram
 
 module.exports = exp;
