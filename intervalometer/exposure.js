@@ -51,7 +51,7 @@ exp.init = function (minEv, maxEv, nightLuminance, dayLuminance, highlightProtec
             targetTimeSeconds: 480,
             evIntegrationSeconds: 480,
             historyIntegrationSeconds: 480,
-            highlightIntegrationFrames: 5,
+            highlightIntegrationFrames: 3,
         },
         maxEv: maxEv,
         minEv: minEv,
@@ -216,6 +216,18 @@ exp.calculate_TLPAuto = function (currentEv, lastPhotoLum, lastPhotoHistogram, m
         const overexposed = 100 * o / (u + o);
         const underexposed = 100 * u / (u + o);
         const highlights = 100 * h / (u + o);
+        const shouldProtect = (highlights > 30 && underexposed <= 51) // this check is for overexposed highlights. blacks and half midtones should be less 51%
+            || (lastPhotoHistogram[lastPhotoHistogram.size - 1] == maxHist && underexposed < 70); // when highlights are clipped but that is a hdr scene, don't clip. 70 backs and midtones enough for hdr
+
+        // highlight protection
+        local.highlightArray.unshift(shouldProtect);
+        local.highlightArray = local.highlightArray.slice(0, config.highlightIntegrationFrames);
+        var saturatedFrames = local.highlightArray.filter(function (i) { return i; }).length
+
+
+        // var tempArray = local.highlightArray.slice(0).sort(function (a, b) {  return a - b;  }).slice(local.highlightArray.length > 2 ? 1 : 0, local.highlightArray.length > 2 ? local.highlightArray.length - 1 : local.highlightArray.length);
+        // exp.status.highlights = tempArray.reduce(function(sum, val) { return sum + val}) / tempArray.length;
+        // // if(local.targetHighlights === null) local.targetHighlights = Math.max(exp.status.highlights, 2);
 
 
         console.log("HIGHLIGHTS: maxHist = ", maxHist);
@@ -225,16 +237,16 @@ exp.calculate_TLPAuto = function (currentEv, lastPhotoLum, lastPhotoHistogram, m
         console.log("HIGHLIGHTS: over = ", overexposed);
         console.log("HIGHLIGHTS: under = ", underexposed);
         console.log("HIGHLIGHTS: hi = ", highlights);
+        console.log("HIGHLIGHTS: local.highlightArray = ", local.highlightArray);
+        console.log("HIGHLIGHTS: saturatedFrames = ", saturatedFrames);
 
-        const shouldProtect = (highlights > 30 && underexposed <= 51) // this check is for overexposed highlights. blacks and half midtones should be less 51%
-            || (lastPhotoHistogram[lastPhotoHistogram.size - 1] == maxHist && underexposed < 70); // when highlights are clipped but that is a hdr scene, don't clip. 70 backs and midtones enough for hdr
 
-        if (shouldProtect          /* exp.status.highlightProtection < exp.config.highlightProtectionLimit*/) {
+        if (saturatedFrames >= config.highlightIntegrationFrames - 1) { // 2 >= 3 - 1
             exp.status.highlightProtection += 0.333;
             exp.status.manualOffsetEv -= 0.333;
             exp.status.rampEv += 0.333;
             console.log("HIGHLIGHTS: protecting", exp.status.highlightProtection);
-        } else if (!shouldProtect && exp.status.highlightProtection > 0.3) {
+        } else if ((saturatedFrames <  config.highlightIntegrationFrames - 1) && (exp.status.highlightProtection > 0.3)) {
             exp.status.highlightProtection -= 0.333;
             exp.status.manualOffsetEv += 0.333;
             exp.status.rampEv -= 0.333;
