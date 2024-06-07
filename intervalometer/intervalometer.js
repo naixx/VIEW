@@ -462,13 +462,27 @@ function motionSyncPulse(callback) {
 }
 
 function fileInit() {
-    fs.writeFileSync(intervalometer.status.timelapseFolder + "/details.csv", "frame, error, target, setting, rate, interval, timestamp, file, p, i, d, direction\n");
-    fs.appendFileSync(intervalometer.status.timelapseFolder + "/details.csv", "frame, evDiff, targetEv, rampEv, rate, intervalMs, lastPhotoTime, file, pComponent, iComponent, dComponent, direction\n");
+    // fs.writeFileSync(intervalometer.status.timelapseFolder + "/details.csv", "frame, error, target, setting, rate, interval, timestamp, file, p, i, d, direction\n");
+    fs.writeFileSync(intervalometer.status.timelapseFolder + "/details.csv",
+        "frame, evDiff, targetEv, rampEv, rate, lastPhotoLum, intervalMs, lastPhotoTime, file, pComponent, iComponent, dComponent, direction\n");
 
 }
 
 function writeFile() {
-    fs.appendFileSync(intervalometer.status.timelapseFolder + "/details.csv", intervalometer.status.frames + ", " + intervalometer.status.evDiff + "," + exp.status.targetEv + "," + intervalometer.status.rampEv + "," + exp.status.rate + "," + (intervalometer.status.intervalMs / 1000) + "," + intervalometer.status.lastPhotoTime + "," + intervalometer.status.path + "," + exp.status.pComponent + "," + exp.status.iComponent + "," + exp.status.dComponent + "," + exp.status.direction + "\n");
+    fs.appendFileSync(intervalometer.status.timelapseFolder + "/details.csv",
+        intervalometer.status.frames + ", " +
+        intervalometer.status.evDiff + "," +
+        exp.status.targetEv + "," +
+        intervalometer.status.rampEv + "," +
+        exp.status.rate + "," +
+        intervalometer.status.lastPhotoLum + "," +
+        (intervalometer.status.intervalMs / 1000) + "," +
+        intervalometer.status.lastPhotoTime + "," +
+        intervalometer.status.path + "," +
+        exp.status.pComponent + "," +
+        exp.status.iComponent + "," +
+        exp.status.dComponent + "," +
+        exp.status.direction + "\n");
     //image.writeXMP(name, intervalometer.status.evDiff);
 }
 
@@ -1538,13 +1552,17 @@ function runPhoto(isRetry) {
                     if (model && model.match(/5DS/i)) intervalometer.autoSettings.paddingTimeMs += 1000; // add one second for 5DS
 
                     if (intervalometer.status.rampMode == "auto") {
-                        intervalometer.status.rampEv = exp.calculate(intervalometer.currentProgram.rampAlgorithm, intervalometer.currentProgram.lrtDirection, intervalometer.status.rampEv, referencePhotoRes.ev, referencePhotoRes.histogram, camera.minEv(remap('camera.ptp.settings'), getEvOptions()), camera.maxEv(remap('camera.ptp.settings'), getEvOptions()));
+                        intervalometer.status.rampEv = exp.calculate(intervalometer.currentProgram.rampAlgorithm, intervalometer.currentProgram.lrtDirection, intervalometer.status.rampEv, referencePhotoRes.ev, referencePhotoRes.histogram,
+                            camera.minEv(remap('camera.ptp.settings'), getEvOptions()), camera.maxEv(remap('camera.ptp.settings'), getEvOptions()),
+                            intervalometer.status.frames
+                        );
                         intervalometer.status.rampRate = exp.status.rate;
                     } else if (intervalometer.status.rampMode == "fixed") {
                         intervalometer.status.rampRate = 0;
                     }
 
                     intervalometer.status.path = referencePhotoRes.file;
+                    intervalometer.status.lastPhotoLum = referencePhotoRes.ev;
                     intervalometer.status.message = "running";
                     if (!checkCurrentPlan(true)) setupExposure();
 

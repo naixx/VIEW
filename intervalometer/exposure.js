@@ -72,7 +72,7 @@ exp.init = function (minEv, maxEv, nightLuminance, dayLuminance, highlightProtec
     return exp.config;
 }
 
-exp.calculate = function (algorithm, direction, currentEv, lastPhotoLum, lastPhotoHistogram, minEv, maxEv) {
+exp.calculate = function (algorithm, direction, currentEv, lastPhotoLum, lastPhotoHistogram, minEv, maxEv, frame) {
     if (minEv != null) exp.config.minEv = minEv;
     if (maxEv != null) exp.config.maxEv = maxEv;
     //// lastPhotoHistogram = normalizeHistogram(lastPhotoHistogram);
@@ -81,13 +81,14 @@ exp.calculate = function (algorithm, direction, currentEv, lastPhotoLum, lastPho
 
     console.log("lastPhotoHistogram = ", JSON.stringify(lastPhotoHistogram));
     fs.appendFileSync(local.datajs, "{ \n" +
+        "frame: " + frame + ", \n" +
         "lastPhotoHistogram: " + JSON.stringify(lastPhotoHistogram) + ", \n" +
-        "currentEv: " + currentEv +", \n" +
+        "currentEv: " + currentEv + ", \n" +
         "lastPhotoLum: " + lastPhotoLum + ", \n" +
         "minEv: " + minEv + ", \n" +
         "maxEv: " + maxEv + ", \n" +
         "},"
-        );
+    );
 
     //if(algorithm == "lrt") {
     //    return exp.calculate_LRTtimelapse(currentEv, direction, lastPhotoLum, lastPhotoHistogram, minEv, maxEv);
@@ -231,12 +232,12 @@ exp.calculate_TLPAuto = function (currentEv, lastPhotoLum, lastPhotoHistogram, m
         if (shouldProtect          /* exp.status.highlightProtection < exp.config.highlightProtectionLimit*/) {
             exp.status.highlightProtection += 0.333;
             exp.status.manualOffsetEv -= 0.333;
-            exp.status.rampEv -= 0.333;
+            exp.status.rampEv += 0.333;
             console.log("HIGHLIGHTS: protecting", exp.status.highlightProtection);
         } else if (!shouldProtect && exp.status.highlightProtection > 0.3) {
             exp.status.highlightProtection -= 0.333;
             exp.status.manualOffsetEv += 0.333;
-            exp.status.rampEv += 0.333;
+            exp.status.rampEv -= 0.333;
             console.log("HIGHLIGHTS: restoring", exp.status.highlightProtection);
         }
         exp.status.highlightProtection = Math.round(exp.status.highlightProtection * 1000) / 1000;
@@ -321,9 +322,8 @@ function calculateDelta(currentEv, lastPhotoLum, config) {
         x: exp.config.nightCompensationDayEv,
         y: 0
     }]
-
+    exp.status.nightRatio = interpolate.linear(evScale, currentEv);
     if (local.first) {
-        exp.status.nightRatio = interpolate.linear(evScale, currentEv);
 
 //        exp.status.nightRefEv = lastPhotoLum * exp.status.nightRatio + -1.5 * (1 - exp.status.nightRatio);
 //        exp.status.dayRefEv = lastPhotoLum * (1 - exp.status.nightRatio);

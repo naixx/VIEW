@@ -8,3 +8,4 @@ frontend/DEV/*
 segfault.log/*
 .idea
 work
+logs
