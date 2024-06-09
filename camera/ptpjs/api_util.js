@@ -63,12 +63,12 @@ exports.adjustCameraExposure = function (targetEv, currentEv,
             if (!equalEv(isoEv, i) /*&& (lastParamUp != 'i' || directionChanged && lastParamDown == 'i')*/) {
                 isoEv = i;
                 if (options.blendParams) lastParamUp = 'i';
-            } else if (apertureEnabled && !equalEv(apertureEv, a) && (lastParamUp != 'a' || directionChanged && lastParamDown == 'a')) {
-                apertureEv = a;
-                if (options.blendParams) lastParamUp = 'a';
             } else if (!equalEv(shutterEv, s) && (lastParamUp != 's' || directionChanged && lastParamDown == 's')) {
                 shutterEv = s;
                 if (options.blendParams) lastParamUp = 's';
+            } else if (apertureEnabled && !equalEv(apertureEv, a) && (lastParamUp != 'a' || directionChanged && lastParamDown == 'a')) {
+                apertureEv = a;
+                if (options.blendParams) lastParamUp = 'a';
             } else {
                 lastParamUp = null;
                 currentEv = getEv(shutterEv, apertureEv, isoEv);
