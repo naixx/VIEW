@@ -1636,6 +1636,8 @@ if (VIEW_HARDWARE) {
                     inputs.removeListener('D', captureDialHandler);
                     setTimeout(cb, 500);
                     ui.status("liveview error");
+                } else {
+                    showLiveViewScreen();
                 }
             });
             lists.fixedApertureEv = core.currentProgram.manualAperture;
@@ -5872,6 +5874,11 @@ core.on('camera.photo', function() {
             } else {
                 //app.addJpegFrame(core.photo.jpeg);
                 //app.addJpegFrame(core.photo.jpeg);
+                var lastPhotoLum
+                if (core.photo.ev)
+                     lastPhotoLum = (Math.round(core.photo.ev * 10) / 10).toString() + " L";
+                oled.setEvHistogram(lastPhotoLum, core.photo.histogram);
+
                 var size = {
                     x: 160,
                     q: 80
@@ -5891,7 +5898,6 @@ core.on('camera.photo', function() {
                 }
             }
         }
-
         previewImage = {
             jpeg: core.photo.base64,
             zoomed: core.photo.zoomed,

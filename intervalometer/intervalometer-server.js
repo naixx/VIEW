@@ -23,9 +23,9 @@ message                  args                     response
 'camera-liveview'      enable (bool)              camera_status (obj)
 
 
-event                  payload                    
+event                  payload
 --------------------------------------------------
-'error'                message (str)              
+'error'                message (str)
 'status'               intervalometerStatus (obj)
 'motion-status'        motionStatus (obj)
 'camera-status'        cameraStatus (obj)
@@ -512,11 +512,30 @@ function runCommand(type, args, callback, client) {
           camera.ptp.new.liveviewImage(function(err, img) {
             cameraCallback(err);
             if(!err && img) {
-              var obj = {
-                base64: new Buffer(img).toString('base64'),
-                type: 'preview'
-              };
-              sendEvent('camera.photo', obj);
+
+                    var size = {
+                        x: 160,
+                        q: 128-15
+                    }
+                    image.downsizeJpeg(img, size, null, function (err, lowResJpg) {
+                        var img2;
+                        if (!err && lowResJpg) {
+                            img2 = lowResJpg;
+                        } else {
+                            im2g = img;
+                        }
+                        var photoRes = {
+                            base64: new Buffer(img2).toString('base64'),
+                            type: 'preview',
+                            ev: null
+                        }
+                        image.exposureValue(img2, function (err, ev, histogram) {
+                            photoRes.ev = ev;
+                            photoRes.histogram = histogram;
+                            sendEvent('camera.photo', photoRes);
+                            callback && callback(err, photoRes);
+                        });
+                    });
             } else {
               console.log("PREVIEW: err:", err);
             }
@@ -588,7 +607,7 @@ function runCommand(type, args, callback, client) {
         camera.ptp.new.switchPrimary(args.cameraObject, callback);
       } else {
         camera.ptp.switchPrimary(args.cameraObject, callback);
-      }    
+      }
       break;
     case 'camera.ptp.capture':
       remap('camera.ptp.capture')(args.options, cameraCallback);
@@ -723,7 +742,7 @@ function getNewSettings(settings, status) {
           shutter: settings.shutter && settings.shutter.list,
           aperture: settings.aperture && settings.aperture.list,
           iso: settings.iso && settings.iso.list
-        }, 
+        },
         details: {
           shutter: settings.shutter,
           aperture: settings.aperture,

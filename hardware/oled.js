@@ -365,6 +365,10 @@ oled.updateHistogram = function(histogram) {
         statusDetails.histogram = histogram;
     }, 100);
 }
+oled.setEvHistogram = function (ev, histogram) {
+    statusDetails.histogram = histogram;
+    statusDetails.ev = ev;
+}
 
 oled.setTimelapseMode = function(set) {
     if(set) {
@@ -1055,6 +1059,22 @@ oled.exposure = function(jpegFile, textArray, highlightTextIndex) {
     } else {
         fb.rect(0, 15, 160, 128 - 15, true);
     }
+
+    var histX = 110;
+    var histY = 76;
+    var histH = 37;
+    var histW = 50;
+    if(statusDetails.histogram) {
+        color("background");
+        fb.rect(histX, histY, histW, histH, false);
+        color("primary");
+        for(var i = 0; i < 256; i++) {
+            var x = histX + 1 + (histW - 2) * (i/255);
+            var h = statusDetails.histogram[i] ? (histH - 2) * (statusDetails.histogram[i]/256) : 0;
+            fb.line(x, histY + 1 + histH - h, x, histY + 1 + histH, 1);
+        }
+    }
+
     fb.font(MENU_STATUS_FONT_SIZE, false, FONT_DEFAULT);
     color("primary");
     var sectionSize = 160 / textArray.length;
@@ -1068,6 +1088,15 @@ oled.exposure = function(jpegFile, textArray, highlightTextIndex) {
             fb.rect(i * sectionSize + 0.5, 116.5, sectionSize - 0.5, 11, false);
             color("primary");
         }
+    }
+    if (statusDetails.ev) {
+        var textSize = fb.textSize(statusDetails.ev);
+        var x = 160 - textSize.width - 4;
+        fb.color(0, 0, 0);
+        var  y = 76 - 12;
+        fb.rect(x - 2, y - textSize.height, textSize.width + 4, textSize.height + 4, true);
+        color("primary");
+        fb.text(x, y, statusDetails.ev);
     }
     oled.update(true);
 }
