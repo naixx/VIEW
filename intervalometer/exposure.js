@@ -57,7 +57,7 @@ exp.init = function (minEv, maxEv, nightLuminance, dayLuminance, highlightProtec
         minEv: minEv,
         maxRate: 30,
         hysteresis: 0.4,
-        nightCompensationDayEv: 8,
+        nightCompensationDayEv: 10,
         nightCompensationNightEv: -1,
         nightCompensation: 'auto',
         nightLuminance: nightLuminance,
@@ -222,7 +222,9 @@ exp.calculate_TLPAuto = function (currentEv, lastPhotoLum, lastPhotoHistogram, m
         // highlight protection
         local.highlightArray.unshift(shouldProtect);
         local.highlightArray = local.highlightArray.slice(0, config.highlightIntegrationFrames);
-        var saturatedFrames = local.highlightArray.filter(function (i) { return i; }).length
+        var saturatedFrames = local.highlightArray.filter(function (i) {
+            return i;
+        }).length
 
 
         // var tempArray = local.highlightArray.slice(0).sort(function (a, b) {  return a - b;  }).slice(local.highlightArray.length > 2 ? 1 : 0, local.highlightArray.length > 2 ? local.highlightArray.length - 1 : local.highlightArray.length);
@@ -246,10 +248,9 @@ exp.calculate_TLPAuto = function (currentEv, lastPhotoLum, lastPhotoHistogram, m
             exp.status.manualOffsetEv -= 0.333;
             exp.status.rampEv += 0.333;
             console.log("HIGHLIGHTS: protecting", exp.status.highlightProtection);
-        } else if ((saturatedFrames <  config.highlightIntegrationFrames - 1) && (exp.status.highlightProtection > 0.3)) {
+        } else if ((saturatedFrames < config.highlightIntegrationFrames - 1) && (exp.status.highlightProtection > 0.3)) {
             exp.status.highlightProtection -= 0.333;
             exp.status.manualOffsetEv += 0.333;
-            exp.status.rampEv -= 0.333;
             console.log("HIGHLIGHTS: restoring", exp.status.highlightProtection);
         }
         exp.status.highlightProtection = Math.round(exp.status.highlightProtection * 1000) / 1000;
@@ -339,8 +340,10 @@ function calculateDelta(currentEv, lastPhotoLum, config) {
 
 //        exp.status.nightRefEv = lastPhotoLum * exp.status.nightRatio + -1.5 * (1 - exp.status.nightRatio);
 //        exp.status.dayRefEv = lastPhotoLum * (1 - exp.status.nightRatio);
-        exp.status.nightRefEv = lastPhotoLum * exp.status.nightRatio + exp.config.nightLuminance * (1 - exp.status.nightRatio);
-        exp.status.dayRefEv = lastPhotoLum * (1 - exp.status.nightRatio) + exp.config.dayLuminance * exp.status.nightRatio;
+        var duration = (exp.config.dayLuminance - exp.config.nightLuminance)
+
+        exp.status.nightRefEv = lastPhotoLum - duration * (1 - exp.status.nightRatio);
+        exp.status.dayRefEv = lastPhotoLum + duration * (exp.status.nightRatio);
         exp.status.fixedRefEv = lastPhotoLum;
         exp.status.manualOffsetEv = lastPhotoLum - getEvOffsetScale(currentEv);
         console.log("EXPOSURE: lastPhotoLum =", lastPhotoLum);
@@ -359,12 +362,12 @@ function calculateDelta(currentEv, lastPhotoLum, config) {
 
     local.lumArray = tv.purgeArray(local.lumArray, config.evIntegrationSeconds);
     local.evArray = tv.purgeArray(local.evArray, config.evIntegrationSeconds);
-    console.log("local.lumArray = ", local.lumArray.map(function (item) {
-        return item.val;
-    }));
-    console.log("local.evArray = ", local.evArray.map(function (item) {
-        return item.val;
-    }));
+    // console.log("local.lumArray = ", local.lumArray.map(function (item) {
+    //     return item.val;
+    // }));
+    // console.log("local.evArray = ", local.evArray.map(function (item) {
+    //     return item.val;
+    // }));
 
     var trim = 1;
     if (exp.status.intervalSeconds) {

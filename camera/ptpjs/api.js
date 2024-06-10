@@ -592,7 +592,7 @@ api.setEv = function(targetEv, options, callback) {
         });
     }
 
-    api_util.setZeros();
+	if(!options.blendParams) api_util.setZeros()
     const result = api_util.adjustCameraExposure(targetEv, currentEv,
         shutterEv, shutterList,
         apertureEnabled, apertureEv, apertureList,

@@ -1,24 +1,30 @@
 //var intervalometer = require('./intervalometer/intervalometer');
 var exp = require('./intervalometer/exposure');
-var datajs = require('./work/tl-217/data')
+var datajs = require('./work/tl-243/data')
 // var datajs = require('./logs/data')
 const api_util = require('./camera/ptpjs/api_util')
-let setev = require('./work/tl-231/setev')
+var setev = require('./work/tl-243/setev')
 
 
 exp.init(-7, 19, -1, 0, true, "./logs/data2.js");
 
-exp.status.rampEv = 3.3333333333333335
+exp.status.rampEv = 12.3
+lastPhotoHistogram =  [10,44,139,257,257,85,84,41,20,15,15,11,18,12,10,9,1,2,5,0,1,5,1,1,2,0,5,0,0,5,0,0,0,0,0,1,0,0,0,0,0,1,0,0,0,0,0,1,1,0,0,0,0,0,0,2,0,1,1,1,1,1,0,0,3,0,4,4,2,8,5,10,16,14,18,19,23,28,27,32,45,52,60,70,62,69,63,56,66,53,53,73,72,77,74,62,62,59,60,75,66,82,81,82,82,80,93,112,119,133,114,111,146,149,156,160,159,153,146,113,81,119,107,90,113,22,9,4,9,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]
+var rate = exp.calculate("lrt", "auto", 12.3, -1.0397291300213682, lastPhotoHistogram, -7, 19);
 
-datajs.data.forEach(value => {
+/*datajs.data.forEach((value, i) => {
 
-    //TODO var rate = exp.calculate("lrt", "auto", value.currentEv, value.lastPhotoLum, value.lastPhotoHistogram, -7, 19);
-    // console.log("rate = ", rate);
+    //TODO
+    if (i == 235)
+        i = i;
+    var rate = exp.calculate("lrt", "auto", value.currentEv, value.lastPhotoLum, value.lastPhotoHistogram, -7, 19);
+    console.log("rate = ", rate);
 
 })
 
+return;*/
 
-let exposure = {
+var exposure = {
     shutter:
         {
             list: [
@@ -177,22 +183,22 @@ function getEv(shutterEv, apertureEv, isoEv) {
     return shutterEv + 6 + apertureEv + 8 + isoEv;
 }
 
-var shutterList = api_util.listEvs(exposure, 'shutter', -10, null);
+var shutterList = api_util.listEvs(exposure, 'shutter', -8 - 2 / 3, null);
 var apertureList = api_util.listEvs(exposure, 'aperture', -5, -2);
 var isoList = api_util.listEvs(exposure, 'iso', -5, 0);
 
 
-let s = 2 + 1 / 3;
-let a = -4;
-let i = 0;
+var s = 1;
+var a = -2 - 2 / 3;
+var i = 0;
 
-let currentEv = getEv(s, a, i)
-console.log("initial sh = ", api_util.findEvName(exposure, `shutter`, s))
-console.log("initial a = ", api_util.findEvName(exposure, `aperture`, a))
-console.log("initial iso = ", api_util.findEvName(exposure, `iso`, i))
+var currentEv = getEv(s, a, i)
+console.log("initial sh = ", api_util.findEvName(exposure, 'shutter', s))
+console.log("initial a = ", api_util.findEvName(exposure, 'aperture', a))
+console.log("initial iso = ", api_util.findEvName(exposure, 'iso', i))
 console.log("currentEv = " + currentEv)
 
-let res = {
+var res = {
     shutterEv: s,
     apertureEv: a,
     isoEv: i,
@@ -200,13 +206,22 @@ let res = {
     direction: "-"
 }
 
-console.log(api_util.findEvName(exposure, `shutter`, res.shutterEv), " ",
-    api_util.findEvName(exposure, `aperture`, res.apertureEv), " ",
-    api_util.findEvName(exposure, `iso`, res.isoEv));
+res = api_util.adjustCameraExposure(res.currentEv, res.currentEv,
+    res.shutterEv, shutterList,
+    true, res.apertureEv, apertureList,
+    res.isoEv, isoList,
+    {blendParams: true},
+    getEv
+)
 
-setev.data.forEach((value, i) => {
+console.log(api_util.findEvName(exposure, 'shutter', res.shutterEv), " ",
+    api_util.findEvName(exposure, 'aperture', res.apertureEv), " ",
+    api_util.findEvName(exposure, 'iso', res.isoEv));
 
-    let targetEv = value
+setev.data.forEach(function (value, i) {
+
+    api_util.setZeros();
+    var targetEv = value
     if (i == 39)
         i = 39;
     if (!api_util.equalEv(value, res.currentEv))
@@ -220,9 +235,9 @@ setev.data.forEach((value, i) => {
     else
         res.direction = "-";
 
-    console.log(i, " ", api_util.findEvName(exposure, `shutter`, res.shutterEv), " ",
-        api_util.findEvName(exposure, `aperture`, res.apertureEv), " ",
-        api_util.findEvName(exposure, `iso`, res.isoEv), " ",
+    console.log(i, " ", api_util.findEvName(exposure, 'shutter', res.shutterEv), " ",
+        api_util.findEvName(exposure, 'aperture', res.apertureEv), " ",
+        api_util.findEvName(exposure, 'iso', res.isoEv), " ",
         res.direction, " ",
         res.lastParam, " ",
         targetEv.toFixed(2), " ",
