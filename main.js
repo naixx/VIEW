@@ -889,7 +889,7 @@ if (VIEW_HARDWARE) {
     var intervalPlan = function(planIndex) {
         if(!core.currentProgram.exposurePlans[planIndex]) core.currentProgram.exposurePlans[planIndex] = {};
         if(!core.currentProgram.exposurePlans[planIndex].interval) core.currentProgram.exposurePlans[planIndex].interval = 6;
-    
+
         var res = {
             name: "interval",
             type: "options",
@@ -1356,7 +1356,7 @@ if (VIEW_HARDWARE) {
                 action: ui.set(core.currentProgram.exposurePlans[planIndex], 'hdrCount', 15)
             }]
         }
-    } 
+    }
 
     var hdrCountOptions = {
         name: "HDR Exposures",
@@ -1445,7 +1445,7 @@ if (VIEW_HARDWARE) {
                 action: ui.set(core.currentProgram.exposurePlans[planIndex], 'hdrStops', 2)
             }]
         }
-    } 
+    }
 
     var hdrStopsOptions = {
         name: "HDR Bracket Step",
@@ -1690,7 +1690,7 @@ if (VIEW_HARDWARE) {
                         core.getCurrentTimelapseFrames(null, function(err, framesPaths) {
                             if(framesPaths) {
                                 oled.video(null, framesPaths, 30, cb);
-                            }                            
+                            }
                         });
                     }
                 }
@@ -1711,7 +1711,7 @@ if (VIEW_HARDWARE) {
             //                            oled.video(null, framesPaths, 30, cb);
             //                        }
             //                    });
-            //                } 
+            //                }
             //            });
             //        }
             //    },
@@ -1735,7 +1735,7 @@ if (VIEW_HARDWARE) {
                     oled.video(null, framesPaths, 30, function(){
                         ui.reload();
                     });
-                }                            
+                }
             });
         },
         button3: function(){
@@ -1871,7 +1871,7 @@ if (VIEW_HARDWARE) {
 
     var getMotor = function(motorName, callback) {
         db.get('motion-'+motorName, callback);
-    } 
+    }
 
     var exposurePlansReview = function() {
         var info = "";
@@ -1881,11 +1881,11 @@ if (VIEW_HARDWARE) {
             var plan = core.currentProgram.exposurePlans[i];
             info += plan.name + '\t';
             if(i < core.currentProgram.exposurePlans.length - 1 && core.currentProgram.exposurePlans[i + 1].start < now) {
-                info += pad + "(skipping)\n"; 
+                info += pad + "(skipping)\n";
                 continue;
             }
             if(i > 0) info += pad + moment(plan.start).fromNow() + '\t';
-            info += pad; 
+            info += pad;
             if(plan.mode == 'preset') {
                 info += lists.getNameFromEv(lists.shutter, plan.shutter) + ', ';
                 info += 'f/' + lists.getNameFromEv(lists.aperture, plan.aperture) + ', ';
@@ -1926,7 +1926,7 @@ if (VIEW_HARDWARE) {
     var motorOrientationKnown = function() {
         if(!core.motionStatus.motors) return false;
 
-        var motors = [];        
+        var motors = [];
         for(var i = 0; i < core.motionStatus.motors.length; i++) {
             if(core.motionStatus.motors[i].connected) motors.push(core.motionStatus.motors[i]);
         }
@@ -2368,7 +2368,7 @@ if (VIEW_HARDWARE) {
                                 });
                                 checkDone();
                             });
-                        
+
                         })(clips[i]);
                     } else {
                         checkDone();
@@ -2765,7 +2765,7 @@ if (VIEW_HARDWARE) {
                                     }
                                 });
                             }
-                        }, 
+                        },
                         condition: function() {
                             return core.sdPresent;
                         }
@@ -2888,7 +2888,7 @@ if (VIEW_HARDWARE) {
             //    }
             //});
         }
-    }    
+    }
 
     var wifiScanWait = function() {
         if(wifi.list.length > 0) {
@@ -2918,7 +2918,7 @@ if (VIEW_HARDWARE) {
             type: "menu"
         }
         m.items = wifi.list.map(function(item){return {
-            name:item.ssid + ((wifi.connected && wifi.connected.address == item.address) ? "~connected" : ""), 
+            name:item.ssid + ((wifi.connected && wifi.connected.address == item.address) ? "~connected" : ""),
             help: help.wifiConnect,
             action: {
                 type: 'function',
@@ -2974,7 +2974,7 @@ if (VIEW_HARDWARE) {
                     details += "Encryption: WPA2\t";
                 } else {
                     details += "Encryption: NONE\t";
-                } 
+                }
                 details += "BSSID: " + w.address + "\t";
                 details += "Channel: " + w.channel + "\t";
                 ui.alert('Wifi details', details);
@@ -4357,8 +4357,8 @@ if (VIEW_HARDWARE) {
             info += "Moon sets at " + moonset.format("h:mm:ss A") + "\t   (" + moonset.fromNow() + ")\t";
             var phase = "unknown";
             var phaseNumber = (sunmoon.mooninfo.phase * 180 / Math.PI) / 180 + 0.5
-            if(phaseNumber == 0 || phaseNumber == 1) phase = "New Moon"; 
-            else if(phaseNumber < 0.25) phase = "Waxing Crescent"; 
+            if(phaseNumber == 0 || phaseNumber == 1) phase = "New Moon";
+            else if(phaseNumber < 0.25) phase = "Waxing Crescent";
             else if(phaseNumber == 0.25) phase = "First Quarter";
             else if(phaseNumber > 0.25 && phaseNumber < 0.5) phase = "Waxing Gibbous";
             else if(phaseNumber == 0.5) phase = "Full Moon";
@@ -4414,10 +4414,10 @@ if (VIEW_HARDWARE) {
                         info += "This is a partial eclipse with " + Math.round(data.coverage * 100) + "% coverage observable from the current location " + currentLocation + ".";
                     }
                 } else {
-                    info += "No upcoming eclipses were found for the current location " + currentLocation + ".";                
+                    info += "No upcoming eclipses were found for the current location " + currentLocation + ".";
                 }
             } else {
-                info += "No upcoming eclipses were found for the current location " + currentLocation + ".";                
+                info += "No upcoming eclipses were found for the current location " + currentLocation + ".";
             }
         } else {
            info = "GPS position info unavailable\t";
@@ -4757,7 +4757,7 @@ if (VIEW_HARDWARE) {
                     } else {
                         cb();
                     }
-                }); 
+                });
             } else {
                 ui.back();
                 //cb();
@@ -4780,7 +4780,7 @@ if (VIEW_HARDWARE) {
                     } else {
                         cb();
                     }
-                }); 
+                });
             } else {
                 ui.back();
                 //cb();
@@ -4875,7 +4875,7 @@ if (VIEW_HARDWARE) {
     });
 
     app.on('logs-uploaded', function(count) {
-        ui.alert('Success', help.logFilesUploaded);    
+        ui.alert('Success', help.logFilesUploaded);
     })
 
     core.on('media.insert', function(type) {
@@ -4986,8 +4986,8 @@ if (VIEW_HARDWARE) {
                     } else {
                         gestureVideoPlaying = false;
                         gestureModeTimer();
-                    }                            
-                }) 
+                    }
+                })
             }
         }
     });
@@ -5286,7 +5286,7 @@ app.on('message', function(msg) {
                 });
                 break;
 
-            case 'motion':            
+            case 'motion':
                 if (msg.key == "move" && msg.motor && msg.driver) {
                     console.log("moving motor " + msg.motor);
                     (function(driver, motor, steps, reply) {
@@ -5426,7 +5426,7 @@ app.on('message', function(msg) {
                     });
                 })(liveviewOn);
                 break;
-    
+
             case 'capture-test':
                 core.captureTest(function(err){
                     if(err) {
@@ -5553,7 +5553,7 @@ app.on('message', function(msg) {
                             };
                             sendFragment(msg.start);
                         }
-                    }                            
+                    }
                 });
                 break;
 
@@ -5967,7 +5967,7 @@ ui.defaultStatus(defaultStatus);
 ui.status(defaultStatus);
 console.log("Setting default status to '" + defaultStatus + "'")
 
-core.on('camera.exiting', function() {    
+core.on('camera.exiting', function() {
     if(btBlockedForSony) {
         wifi.unblockBt();
         wifi.noReset = false;
@@ -6041,13 +6041,15 @@ core.on('intervalometer.status', function(msg) {
     }
 
 //img116x70, isoText, apertureText, shutterText, intervalSeconds, intervalModeChar, hist60, ramp30, frames, remaining, durationSeconds, bufferSeconds, shutterSeconds
-    
+
     var evText = (Math.round(lists.getEvFromSettings(msg.cameraSettings) * 10) / 10).toString();
+    var lastPhotoLum = (Math.round(msg.lastPhotoLum * 10) / 10).toString();
     var statusScreen = {
         isoText: msg.cameraSettings ? ((typeof msg.cameraSettings.iso == 'object') ? msg.cameraSettings.iso.name : msg.cameraSettings.iso) : "--",
         shutterText: msg.cameraSettings ? ((typeof msg.cameraSettings.shutter == 'object') ? msg.cameraSettings.shutter.name : msg.cameraSettings.shutter) : "--",
         apertureText: msg.cameraSettings ? (((msg.cameraSettings.aperture && msg.cameraSettings.aperture.ev != null) || (msg.cameraSettings.details && msg.cameraSettings.details.aperture && msg.cameraSettings.details.aperture.ev != null)) ? ("f/" + (msg.cameraSettings.details ? msg.cameraSettings.details.aperture.name : msg.cameraSettings.aperture.name)) : ("f/" + lists.getNameFromEv(lists.aperture, core.currentProgram.manualAperture) + ' (m)')) : "--",
         evText: evText + " EV",
+        lastPhotoLum: lastPhotoLum + " L",
         intervalSeconds: msg.intervalMs / 1000,
         bufferSeconds: msg.autoSettings ? msg.autoSettings.paddingTimeMs / 1000 : 5,
         rampModeText: core.currentProgram.rampMode,
