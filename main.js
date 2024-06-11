@@ -4694,7 +4694,15 @@ if (VIEW_HARDWARE) {
 
     inputs.on('D', function(move) {
         power.activity();
-        if(oled.videoRunning) return;
+        if(oled.videoRunning) {
+            if (move == "U") {
+                oled.increaseVideoSpeed();
+            }
+            if (move == "D") {
+                oled.decreaseVideoSpeed();
+            }
+            return;
+        }
 
         blockGestureTimer();
         if (blockInputs) return;

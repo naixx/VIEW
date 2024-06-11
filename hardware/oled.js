@@ -1075,7 +1075,7 @@ oled.exposure = function(jpegFile, textArray, highlightTextIndex) {
         }
     }
 
-    fb.font(MENU_STATUS_FONT_SIZE, false, FONT_DEFAULT);
+    fb.font(MENU_STATUS_FONT_SIZE, false, FONT_DEFAULT);  fb.font(MENU_STATUS_FONT_SIZE, false, FONT_DEFAULT);
     color("primary");
     var sectionSize = 160 / textArray.length;
     for(var i = 0; i < textArray.length; i++) {
@@ -1134,6 +1134,7 @@ oled.batteryPercentage = function(percentage) {
 var videoIntervalHandle = null;
 var videoCallback = null;
 var skipFrames = 0;
+var fpsMultiplier = 0;
 oled.video = function(videoPathFormat, frames, fps, callback) {
     console.log("playing video, mode=", typeof frames);
     if(oled.videoRunning) return callback && setTimeout(callback);
@@ -1153,7 +1154,7 @@ oled.video = function(videoPathFormat, frames, fps, callback) {
     var indexString, paddingLength;
     var frameComplete = true;
     var frameLineFactor = (160 - 6) / frames;
-
+    fb.font(MENU_STATUS_FONT_SIZE, false, FONT_DEFAULT);  fb.font(MENU_STATUS_FONT_SIZE, false, FONT_DEFAULT);
     videoIntervalHandle = setInterval(function(){
         if(!frameComplete) {
             console.log("dropping frame #" + index);
@@ -1162,6 +1163,8 @@ oled.video = function(videoPathFormat, frames, fps, callback) {
         frameComplete = false;
         frameIndex += skipFrames;
         skipFrames = 0;
+        if (fpsMultiplier > 0)
+            frameIndex += fpsMultiplier;
         if(frameIndex > frames) oled.stopVideo();
 
         if(frameArray) {
@@ -1182,6 +1185,16 @@ oled.video = function(videoPathFormat, frames, fps, callback) {
         fb.line(3, 127 - 3, 159 - 3, 127 - 3, 2);
         color("primary");
         fb.line(3, 127 - 3, frameIndex * frameLineFactor, 127 - 3, 2);
+
+        var s = "x" + (fpsMultiplier + 1);
+        var textSize = fb.textSize(s);
+        var x = 160 - textSize.width - 4;
+        fb.color(0, 0, 0);
+        var y = 50;
+        fb.rect(x - 2, y - textSize.height, textSize.width + 4, textSize.height + 4, true);
+        color("primary");
+        fb.text(x, y, s);
+
         fb.blit();
         frameComplete = true;
     }, 1000 / (fps||24));
@@ -1197,5 +1210,13 @@ oled.videoSkipFrames = function(frames) {
     if(oled.videoRunning) {
         skipFrames = frames;
     }
+}
+oled.increaseVideoSpeed = function () {
+    fpsMultiplier++;
+    if (fpsMultiplier > 15) fpsMultiplier = 15;
+}
+oled.decreaseVideoSpeed = function () {
+    fpsMultiplier--;
+    if (fpsMultiplier <=0) fpsMultiplier = 0;
 }
 module.exports = oled;
