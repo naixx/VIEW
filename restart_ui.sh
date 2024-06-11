@@ -18,8 +18,6 @@ done
 cd /home/view/current;
 DATE=`date +"%Y%m%d-%H%M%S"`
 UILOGFILE="/var/log/view-ui-$DATE.txt"
-cat ./logs/current.txt > ./logs/previous.txt
-> ./logs/current.txt
 prepend_date() { while read line; do echo "$(date +%Y%m%d-%H%M%S) $line"; done }
 echo "starting UI...";
-forever -c "node --max_old_space_size=128" main.js 2>&1 | prepend_date >> $UILOGFILE &
+forever -l forever.log -c "node --max_old_space_size=128" main.js 2>&1 | prepend_date >> $UILOGFILE &

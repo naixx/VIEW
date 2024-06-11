@@ -15,7 +15,7 @@ cd /home/view/current;
 DATE=`date +"%Y%m%d-%H%M%S"`
 CORELOGFILE="/var/log/view-core-$DATE.txt"
 cat ./logs/current.txt > ./logs/previous.txt
-> ./logs/current.txt
+> ./logs/last.txt
 prepend_date() { while read line; do echo "$(date +%Y%m%d-%H%M%S) $line"; done }
 echo "starting CORE...";
-forever -c "node --max_old_space_size=320 --expose-gc" intervalometer/intervalometer-server.js 2>&1 | prepend_date | tee -a $CORELOGFILE ./logs/current.txt &
+forever -c "node --max_old_space_size=320 --expose-gc" intervalometer/intervalometer-server.js 2>&1 | prepend_date | tee -a $CORELOGFILE ./logs/last.txt &
