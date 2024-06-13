@@ -5,6 +5,28 @@ var datajs = require('./work/tl-243/data')
 const api_util = require('./camera/ptpjs/api_util')
 var setev = require('./work/tl-243/setev')
 
+var nightLuminance = [-3, -2.5];
+for (var i = -2; i <= 2.1; i += 0.1) {
+    nightLuminance.push(i.toFixed(1));
+}
+var m = nightLuminance.map(function (i) {
+    var n = (i > 0) ? '+' + i : ( i < 0? '-': '') + Math.abs(i);
+
+    var s = "stops"
+    if (i == -1.5) {
+        s += " (default)";
+    }
+    if (i == 1 || i == -1) {
+        s = "stop";
+    }
+    return {
+        name: "Night Luminance Target",
+        value: n + " " + s,
+      //  help: help.nightLuminance,
+       // action: ui.set(core.currentProgram, 'nightLuminance', i)
+    }
+})
+console.log(m)
 
 exp.init(-7, 19, -1, 0, true, "./logs/data2.js");
 
