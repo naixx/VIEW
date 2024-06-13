@@ -98,6 +98,17 @@ exp.calculate = function (algorithm, direction, currentEv, lastPhotoLum, lastPho
     //}
 }
 
+exp.estimateDayNightLuminance = function (currentEv, lastPhotoLum) {
+    var nightRatio = calculateNightRatio(currentEv);
+    var r = calculateDayNightReferences(currentEv, lastPhotoLum, nightRatio);
+    return {
+        currentEv: currentEv,
+        nightRatio: nightRatio,
+        dayRefEv: r.dayRefEv,
+        nightRefEv: r.nightRefEv
+    }
+}
+
 /*
 exp.calculate_LRTtimelapse = function(currentEv, direction, lastPhotoLum, lastPhotoHistogram, minEv, maxEv) {
     var lum = 0;
@@ -317,6 +328,25 @@ function calculateRate(currentEv, lastPhotoLum, config) {
     return rate;
 }
 
+function calculateNightRatio(currentEv) {
+    var evScale = [{
+        x: exp.config.nightCompensationNightEv,
+        y: 1
+    }, {
+        x: exp.config.nightCompensationDayEv,
+        y: 0
+    }]
+    return interpolate.linear(evScale, currentEv);
+}
+
+function calculateDayNightReferences(currentEv, lastPhotoLum, nightRatio) {
+    var duration = (exp.config.dayLuminance - exp.config.nightLuminance)
+    return {
+        nightRefEv: lastPhotoLum - duration * (1 - nightRatio),
+        dayRefEv: lastPhotoLum + duration * (nightRatio),
+    }
+}
+
 function calculateDelta(currentEv, lastPhotoLum, config) {
     local.lumArray.push({
         val: lastPhotoLum,
@@ -327,23 +357,17 @@ function calculateDelta(currentEv, lastPhotoLum, config) {
         val: currentEv + lastPhotoLum,
         time: new Date()
     });
+    exp.status.nightRatio = calculateNightRatio(currentEv);
 
-    var evScale = [{
-        x: exp.config.nightCompensationNightEv,
-        y: 1
-    }, {
-        x: exp.config.nightCompensationDayEv,
-        y: 0
-    }]
-    exp.status.nightRatio = interpolate.linear(evScale, currentEv);
     if (local.first) {
 
 //        exp.status.nightRefEv = lastPhotoLum * exp.status.nightRatio + -1.5 * (1 - exp.status.nightRatio);
 //        exp.status.dayRefEv = lastPhotoLum * (1 - exp.status.nightRatio);
-        var duration = (exp.config.dayLuminance - exp.config.nightLuminance)
 
-        exp.status.nightRefEv = lastPhotoLum - duration * (1 - exp.status.nightRatio);
-        exp.status.dayRefEv = lastPhotoLum + duration * (exp.status.nightRatio);
+        var r = calculateDayNightReferences(currentEv, lastPhotoLum, exp.status.nightRatio);
+
+        exp.status.nightRefEv = r.nightRefEv;
+        exp.status.dayRefEv = r.dayRefEv;
         exp.status.fixedRefEv = lastPhotoLum;
         exp.status.manualOffsetEv = lastPhotoLum - getEvOffsetScale(currentEv);
         console.log("EXPOSURE: lastPhotoLum =", lastPhotoLum);

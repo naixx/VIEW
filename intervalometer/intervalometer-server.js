@@ -532,6 +532,12 @@ function runCommand(type, args, callback, client) {
                         image.exposureValue(img2, function (err, ev, histogram) {
                             photoRes.ev = ev;
                             photoRes.histogram = histogram;
+                            var r = intervalometer.estimateDayNightLuminance(ev);
+                            photoRes.nightRatio = r.nightRatio;
+                            photoRes.currentEv = r.currentEv;
+                            photoRes.dayRefEv = r.dayRefEv;
+                            photoRes.nightRefEv = r.nightRefEv;
+
                             sendEvent('camera.photo', photoRes);
                             callback && callback(err, photoRes);
                         });

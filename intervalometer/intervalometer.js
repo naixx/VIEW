@@ -1431,7 +1431,7 @@ function runPhoto(isRetry) {
                     intervalometer.status.frames++;
                     //writeFile();
                     intervalometer.emit("intervalometer.status", intervalometer.status);
-                   // log("TL: program intervalometer.status:", intervalometer.status);
+                    // log("TL: program intervalometer.status:", intervalometer.status);
                 } else {
                     logErr("error occurred during capture", err);
                     intervalometer.emit('error', "An error occurred during capture.  This could mean that the camera body is not supported or possibly an issue with the cable disconnecting.\nThe time-lapse will attempt to continue anyway.\nSystem message: ", err);
@@ -2393,6 +2393,11 @@ intervalometer.setAuxPulseInvert = function (invert, callback) {
 intervalometer.setAuxExternalPad = function (padMs, callback) {
     auxMotionConfig.externalIntervalPaddingMs = padMs;
     log("INTERVALOMETER: set aux externalIntervalPaddingMs to", auxMotionConfig.externalIntervalPaddingMs);
+}
+
+intervalometer.estimateDayNightLuminance = function (lastPhotoLum) {
+    var currentEv = camera.lists.getEvFromSettings(remap('camera.ptp.settings'));
+    return exp.estimateDayNightLuminance(currentEv, lastPhotoLum);
 }
 
 
