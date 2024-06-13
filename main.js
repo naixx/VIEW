@@ -1202,107 +1202,56 @@ if (VIEW_HARDWARE) {
         }
     }
 
+    var nightLuminance = [-3, -2.5];
+    for (var i = -2; i <= 2.1; i += 0.1) {
+        nightLuminance.push(i.toFixed(1));
+    }
     var rampingNightLuminance = {
         name: "Night Luminance Target",
         type: "options",
-        items: [{
-            name: "Night Luminance Target",
-            value: "-3 stops",
-            help: help.nightLuminance,
-            action: ui.set(core.currentProgram, 'nightLuminance', -3)
-        }, {
-            name: "Night Luminance Target",
-            value: "-2.5 stops",
-            help: help.nightLuminance,
-            action: ui.set(core.currentProgram, 'nightLuminance', -2.5)
-        }, {
-            name: "Night Luminance Target",
-            value: "-2 stops",
-            help: help.nightLuminance,
-            action: ui.set(core.currentProgram, 'nightLuminance', -2)
-        }, {
-            name: "Night Luminance Target",
-            value: "-1.5 stops (default)",
-            help: help.nightLuminance,
-            action: ui.set(core.currentProgram, 'nightLuminance', -1.5)
-        }, {
-            name: "Night Luminance Target",
-            value: "-1 stop",
-            help: help.nightLuminance,
-            action: ui.set(core.currentProgram, 'nightLuminance', -1)
-        }, {
-            name: "Night Luminance Target",
-            value: "-0.5 stops",
-            help: help.nightLuminance,
-            action: ui.set(core.currentProgram, 'nightLuminance', -0.5)
-        }, {
-            name: "Night Luminance Target",
-            value: "0 stops",
-            help: help.nightLuminance,
-            action: ui.set(core.currentProgram, 'nightLuminance', 0)
-        }, {
-            name: "Night Luminance Target",
-            value: "+0.5 stops",
-            help: help.nightLuminance,
-            action: ui.set(core.currentProgram, 'nightLuminance', 0.5)
-        }, {
-            name: "Night Luminance Target",
-            value: "+1 stop",
-            help: help.nightLuminance,
-            action: ui.set(core.currentProgram, 'nightLuminance', 1)
-        }, {
-            name: "Night Luminance Target",
-            value: "+1.5 stops",
-            help: help.nightLuminance,
-            action: ui.set(core.currentProgram, 'nightLuminance', 1.5)
-        }, {
-            name: "Night Luminance Target",
-            value: "2 stops",
-            help: help.nightLuminance,
-            action: ui.set(core.currentProgram, 'nightLuminance', 2)
-        }]
+        items: nightLuminance.map(function (i) {
+            var n = (i > 0) ? '+' + i : ( i < 0? '-': '') + Math.abs(i);
+
+            var s = "stops"
+            if (i == -1.5) {
+                s += " (default)";
+            }
+            if (i == 1 || i == -1) {
+                s = "stop";
+            }
+            return {
+                name: "Night Luminance Target",
+                value: n + " " + s,
+                help: help.nightLuminance,
+                action: ui.set(core.currentProgram, 'nightLuminance', i)
+            }
+        })
     }
 
-
+    var dayLuminance = [];
+    for (var i = -1.5; i <= 1.6; i += 0.1) {
+        dayLuminance.push(i.toFixed(1));
+    }
     var rampingDayLuminance = {
         name: "Day Luminance Target",
         type: "options",
-        items: [{
-            name: "Day Luminance Target",
-            value: "-1.5 stops",
-            help: help.dayLuminance,
-            action: ui.set(core.currentProgram, 'dayLuminance', -1.5)
-        }, {
-            name: "Day Luminance Target",
-            value: "-1 stop",
-            help: help.dayLuminance,
-            action: ui.set(core.currentProgram, 'dayLuminance', -1)
-        }, {
-            name: "Day Luminance Target",
-            value: "-0.5 stops",
-            help: help.dayLuminance,
-            action: ui.set(core.currentProgram, 'dayLuminance', -0.5)
-        }, {
-            name: "Day Luminance Target",
-            value: "0 stops (default)",
-            help: help.dayLuminance,
-            action: ui.set(core.currentProgram, 'dayLuminance', 0)
-        }, {
-            name: "Day Luminance Target",
-            value: "+0.5 stops",
-            help: help.dayLuminance,
-            action: ui.set(core.currentProgram, 'dayLuminance', 0.5)
-        }, {
-            name: "Day Luminance Target",
-            value: "+1 stop",
-            help: help.dayLuminance,
-            action: ui.set(core.currentProgram, 'dayLuminance', 1)
-        }, {
-            name: "Day Luminance Target",
-            value: "+1.5 stops",
-            help: help.dayLuminance,
-            action: ui.set(core.currentProgram, 'dayLuminance', 1.5)
-        }]
+        items: dayLuminance.map(function (i) {
+            var n = (i > 0) ? '+' + i : ( i < 0? '-': '') + Math.abs(i);
+
+            var s = "stops"
+            if (i == 0) {
+                s += " (default)";
+            }
+            if (i == 1 || i == -1) {
+                s = "stop";
+            }
+            return {
+                name: "Night Luminance Target",
+                value: n + " " + s,
+                help: help.nightLuminance,
+                action: ui.set(core.currentProgram, 'nightLuminance', i)
+            }
+        })
     }
 
     var hdrCountPlan = function(planIndex) {
