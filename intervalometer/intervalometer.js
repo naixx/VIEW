@@ -1690,10 +1690,6 @@ intervalometer.validate = function (program) {
                 param: 'dayInterval',
                 reason: 'dayInterval must be at least 2 seconds'
             });
-            if (parseInt(program.nightInterval) < program.dayInterval) results.errors.push({
-                param: 'nightInterval',
-                reason: 'nightInterval shorter than dayInterval'
-            });
         }
     }
 
