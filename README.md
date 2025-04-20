@@ -2,7 +2,9 @@ This fork aims to enhance the stability and predictability of the VIEW intervalo
 
 Currently, I have a general understanding of how VIEW operates, the algorithms involved, and why it may sometimes produce extreme light or dark exposures. At present, it appears that the estimated ramping needs adjustment, and issues with the histogram and luminance calculations are causing inaccuracies. Highlight protection calculations may result in underexposure, so it's advisable to disable this feature. Further investigation is necessary.
 
-Please note that the releases are provided 'AS IS.' During development, I inadvertently caused a soft brick on my VIEW and spent several anxious nights trying to recover it. The provided releases have been tested on my own device. Simply download the archive onto your SD card and install the update via the 'Firmware Update' menu. In case of any issues, consult the troubleshooting section in the official documentation to revert to previous versions. Feel free to reach out to discuss ideas, VIEW development, and future enhancements.
+Please note that the releases are provided 'AS IS.' During development, I inadvertently caused a soft brick on my VIEW and spent several anxious nights trying to recover it. The provided releases have been tested on my own device. 
+## Installation
+Simply download the latest zip archive from the [releases page](https://github.com/naixx/VIEW/releases/latest) onto your SD card and install the update via the 'Firmware Update' menu. In case of any issues, consult the troubleshooting section in the official documentation to revert to previous versions. Feel free to reach out to discuss ideas, VIEW development, and future enhancements.
 ## Changes 
 ### 1.8.52
 * Implemented a new method for calculating the histogram. Past experiences highlighted many overexposed timelapses due to incorrect histogram calculations, leading to failures in actual highlights protection algorithms. Day and night luminance calculations are now more precise, based on the YUV colorspace formula. Adjust your luminance references accordingly for `day` and `night`.
