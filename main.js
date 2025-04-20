@@ -20,6 +20,8 @@ var sys = require('sys')
 console.log('System modules loaded in ' + (new Date() - startupTime) + 'ms');
 
 require('rootpath')();
+var app = require("./system/app.js");
+
 var lists = require('./camera/ptp/lists.js');
 console.log('Lists module loaded in ' + (new Date() - startupTime) + 'ms');
 var updates = require('./system/updates.js');
@@ -36,8 +38,8 @@ console.log('Image module loaded in ' + (new Date() - startupTime) + 'ms');
 if (VIEW_HARDWARE) {
     var power = require('./hardware/power.js');
     console.log('Power module loaded in ' + (new Date() - startupTime) + 'ms');
-    var light = require('./hardware/light.js');
-    console.log('Light module loaded in ' + (new Date() - startupTime) + 'ms');
+    //var light = require('./hardware/light.js');
+    //console.log('Light module loaded in ' + (new Date() - startupTime) + 'ms');
     var oled = require('./hardware/oled.js');
     console.log('Oled module loaded in ' + (new Date() - startupTime) + 'ms');
     var ui = require('./interface/ui.js');
@@ -55,7 +57,6 @@ var wifi = require('./system/wifi.js');
 console.log('Wifi module loaded in ' + (new Date() - startupTime) + 'ms');
 
 if(power) wifi.power = power; // allow wifi module to control power
-var app = require("./system/app.js");
 var db = require("./system/db.js");
 
 //var suncalc = require('suncalc');
@@ -5170,7 +5171,7 @@ mcu.on('gps', function(index) {
     ui.reload();
 });
 
-light.start();
+// light.start();
 
 core.watchdogEnable();
 
@@ -5740,9 +5741,9 @@ app.on('message', function(msg) {
                         });
                     }
                 } else if (msg.key == "light") {
-                    msg.reply('light', {
-                        light: light.ev()
-                    });
+                    // msg.reply('light', {
+                    //     light: light.ev()
+                    // });
                 } else if (msg.key == "battery") {
                     updateAppBattery();
                 } else if (msg.key == "motion") {
