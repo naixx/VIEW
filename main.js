@@ -5863,6 +5863,10 @@ core.on('camera.photo', function() {
             histogram: core.photo.histogram,
             time: new Date()
         };
+        if (core.intervalometerStatus.running) {
+            previewImage.tlName = core.intervalometerStatus.tlName;
+            previewImage.frameIndex = core.intervalometerStatus.frames + 1; //not sure if it is correct
+        }
 
         if (previewImage.imageType == "photo" || previewImage.imageType == "test" || previewImage.imageType == "thumbnail" || liveviewRequestStart) {
             liveviewRequestStart = false;
