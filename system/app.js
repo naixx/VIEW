@@ -45,12 +45,19 @@ express.get('/socket/address', function (req, res) {
 });
 
 express.get('/clips', function (req, res) {
-
-    clips.getRecentTimelapseClips(30, function (err, clips) {
-        res.send(clips.map(function (clip) {
-            if (clip.image) clip.image = new Buffer(clip.image).toString('base64');
-            return clip;
-        }));
+    console.log("API: getting clips");
+    clips.getRecentTimelapseClips(30, true, function (err, clips) {
+        console.log("API: err" + clips);
+        try {
+            var ss = res.send(clips.map(function (clip) {
+                console.log("API: mm" + clip.name);
+                return clip;
+            }));
+            console.log("API: " + ss);
+        } catch (e) {
+            console.log("API: e" + e);
+            res.send(400, e)
+        }
     });
 });
 

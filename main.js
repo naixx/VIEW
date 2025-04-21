@@ -2261,7 +2261,7 @@ if (VIEW_HARDWARE) {
 
     var clipsMenu = function(cb) {
         console.log("fetching clips...");
-        clips.getRecentTimelapseClips(15, function(err, clips) {
+        clips.getRecentTimelapseClips(15, false,function(err, clips) {
             //console.log("########################################################################################################################");
             if (clips && clips.length > 0) {
                 var cm = {
@@ -5439,7 +5439,7 @@ app.on('message', function(msg) {
                 break
 
             case 'timelapse-clips':
-                clips.getRecentTimelapseClips(30, function(err, clips) {
+                clips.getRecentTimelapseClips(30, false, function(err, clips) {
                     if (clips) {
                         msg.reply('timelapse-clips', {
                             clips: clips.map(function(clip) {
