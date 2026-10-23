@@ -7,6 +7,8 @@ var async = require('async');
 var fs = require('fs');
 var db = require("./db.js");
 var clips = require('../intervalometer/clips.js');
+var precompressed = require('./precompressed.js');
+var mdns = require('./mdns.js');
 
 process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
 
@@ -22,12 +24,25 @@ var internalEvent = new EventEmitter();
 app.remoteEnabled = false;
 
 fs.writeFile("/proc/sys/net/ipv4/tcp_low_latency", "0"); // favor low latency over high throughput (reversed now to support high-throughput for LV)
+// This kernel (4.8.0-dirty) boots with igmp_max_memberships = 0, so no socket can join a multicast group and mdns.js
+// could never answer view.local; 20 is the stock Linux default.
+fs.writeFile("/proc/sys/net/ipv4/igmp_max_memberships", "20");
+
+// The browser client (ViewApp :web, Compose/Wasm) lives under /app; its talk with the device (socket/address,
+// clips, download, ws :8101) stays at the root, like the phone app's.
+var WEB_APP_ROOT = '/home/view/current/frontend/app';
 
 function createServer() {
     var Express = require('express');
     var express = Express();
 
     express.use(Express.static('/home/view/current/frontend/www'));
+
+    // mime 1.2.11 (via serve-static/send) predates WebAssembly: without this, .wasm goes out as application/octet-stream
+    // and the browser refuses to instantiate it.
+    Express.static.mime.define({ 'application/wasm': ['wasm'], 'application/javascript': ['mjs'] });
+    express.use('/app', precompressed(WEB_APP_ROOT, Express.static.mime));
+    express.use('/app', Express.static(WEB_APP_ROOT));
 
     express.use(function (req, res, next) {
         res.header("Access-Control-Allow-Origin", "*");
@@ -474,6 +489,11 @@ exec('ps aux | grep "/main.js"', function (err, res) {
         httpServer = createServer().listen(CLIENT_SERVER_PORT, function () {
             console.log('listening on *:' + CLIENT_SERVER_PORT);
         });
+        try {
+            mdns.start(); // view.local; logs and gives up by itself if the socket or the group isn't available
+        } catch (e) {
+            console.log('mDNS: not started: ' + (e && e.message));
+        }
 
         httpServer.on('connection', function (socket) {
             // Add a newly connected socket

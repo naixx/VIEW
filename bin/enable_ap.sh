@@ -15,4 +15,7 @@ rm /var/run/hostapd/wlan0
 ip addr flush dev wlan0
 /home/view/current/bin/hostapd -B -P /run/hostapd.pid /etc/hostapd/hostapd.conf
 ip addr add 10.0.0.1/24 dev wlan0
+# The hotspot has no default route, and node 0.10 can't pin a multicast interface, so mdns.js (view.local) needs
+# an explicit route for the multicast range to send its answers.
+ip route add 224.0.0.0/4 dev wlan0
 #ip route add default via 10.0.0.1
