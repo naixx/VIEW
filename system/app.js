@@ -28,21 +28,22 @@ fs.writeFile("/proc/sys/net/ipv4/tcp_low_latency", "0"); // favor low latency ov
 // could never answer view.local; 20 is the stock Linux default.
 fs.writeFile("/proc/sys/net/ipv4/igmp_max_memberships", "20");
 
-// The browser client (ViewApp :web, Compose/Wasm) lives under /app; its talk with the device (socket/address,
-// clips, download, ws :8101) stays at the root, like the phone app's.
+// The browser client (ViewApp :web, Compose/Wasm) is the page at the root; the old Ionic UI moved to /classic/ (it
+// reaches the device by absolute URLs — app.view.tl or 10.0.0.1 — so its own path doesn't matter to it). The device
+// API (socket/address, clips, download, ws :8101) stays at the root, like the phone app's.
 var WEB_APP_ROOT = '/home/view/current/frontend/app';
+var CLASSIC_UI_ROOT = '/home/view/current/frontend/www';
 
 function createServer() {
     var Express = require('express');
     var express = Express();
 
-    express.use(Express.static('/home/view/current/frontend/www'));
-
     // mime 1.2.11 (via serve-static/send) predates WebAssembly: without this, .wasm goes out as application/octet-stream
     // and the browser refuses to instantiate it.
     Express.static.mime.define({ 'application/wasm': ['wasm'], 'application/javascript': ['mjs'] });
-    express.use('/app', precompressed(WEB_APP_ROOT, Express.static.mime));
-    express.use('/app', Express.static(WEB_APP_ROOT));
+    express.use(precompressed(WEB_APP_ROOT, Express.static.mime));
+    express.use(Express.static(WEB_APP_ROOT));
+    express.use('/classic', Express.static(CLASSIC_UI_ROOT));
 
     express.use(function (req, res, next) {
         res.header("Access-Control-Allow-Origin", "*");
